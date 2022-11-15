@@ -73,7 +73,7 @@ You need a Linux or a Mac machine to build a desktop version of Organic Maps.
 - We haven't compiled Organic Maps on Windows in a long time, though it is possible.
   It is likely some make files should be updated.
   If you succeed, please submit a tutorial.
-  You'll need to have python3, cmake, ninja in the PATH and also to have Qt5 installed.
+  You'll need to have python3, cmake, ninja in the PATH and also to have Qt6 installed.
 
 Ensure that you have at least 20GB of free space.
 
@@ -89,12 +89,14 @@ sudo apt update && sudo apt install -y \
     clang \
     ninja-build \
     python3 \
-    qtbase5-dev \
+    qt6-base-dev \
     libc++-dev \
     libfreetype-dev \
+    libglvnd-dev \
+    libgl1-mesa-dev \
     libglu1-mesa-dev \
     libicu-dev \
-    libqt5svg5-dev \
+    libqt6svg6-dev \
     libsqlite3-dev \
     zlib1g-dev
 ```
@@ -121,8 +123,10 @@ sudo dnf install -y \
     freetype-devel \
     libicu-devel \
     libstdc++-devel \
-    qt5-qtbase-devel \
-    qt5-qtsvg-devel \
+    libgl1-mesa-devel \
+    libglvnd-devel \
+    qt6-qtbase-devel \
+    qt6-qtsvg-devel \
     sqlite-devel
 ```
 

@@ -35,7 +35,6 @@
 #endif // BUILD_DESIGNER
 
 #include <QtGui/QCloseEvent>
-#include <QtWidgets/QDesktopWidget>
 #include <QtWidgets/QDockWidget>
 #include <QtWidgets/QFileDialog>
 #include <QtWidgets/QHBoxLayout>
@@ -207,7 +206,7 @@ MainWindow::MainWindow(Framework & framework, bool apiOpenGLES3,
 #endif // NO_DOWNLOADER
 
   m_pDrawWidget->UpdateAfterSettingsChanged();
-  
+
   RoutingSettings::LoadSession(m_pDrawWidget->GetFramework());
 }
 
