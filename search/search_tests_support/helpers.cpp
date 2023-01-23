@@ -50,6 +50,22 @@ bool SearchTestBase::ResultsMatch(vector<search::Result> const & results, Rules 
   return MatchResults(m_dataSource, rules, results);
 }
 
+bool SearchTestBase::OrderedResultsMatch(std::vector<Result> const & results, Rules const & rules)
+{
+  if (results.size() != rules.size())
+    return false;
+
+  for (size_t i = 0; i < results.size(); ++i)
+  {
+    if (!ResultMatches(m_dataSource, rules[i], results[i]))
+    {
+      LOG(LWARNING, ("Not matched:", rules[i], results[i]));
+      return false;
+    }
+  }
+  return true;
+}
+
 bool SearchTestBase::ResultsMatch(SearchParams const & params, Rules const & rules)
 {
   TestSearchRequest request(m_engine, params);

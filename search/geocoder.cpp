@@ -1205,14 +1205,22 @@ void Geocoder::GreedilyMatchStreets(BaseContext & ctx, CentersFilter const & cen
 {
   TRACE(GreedilyMatchStreets);
 
-  // Match streets without suburbs.
-  vector<StreetsMatcher::Prediction> predictions;
-  StreetsMatcher::Go(ctx, ctx.m_streets, *m_filter, m_params, predictions);
-
-  for (auto const & prediction : predictions)
-    CreateStreetsLayerAndMatchLowerLayers(ctx, prediction, centers);
+  ProcessStreets(ctx, centers, ctx.m_streets);
 
   GreedilyMatchStreetsWithSuburbs(ctx, centers);
+}
+
+void Geocoder::ProcessStreets(BaseContext & ctx, CentersFilter const & centers, CBV const & streets)
+{
+  using PredictionT = StreetsMatcher::Prediction;
+  vector<PredictionT> predictions;
+  StreetsMatcher::Go(ctx, streets, *m_filter, m_params, predictions);
+
+  for (size_t i = 0; i < predictions.size(); ++i)
+    CreateStreetsLayerAndMatchLowerLayers(ctx, predictions[i], centers);
+
+  /// @todo If predictions has TYPE_STREET only layer, we should emit max token length result.
+  /// Now we emit some low-ranked street result, see ProcessorTest_StreetCategories.
 }
 
 void Geocoder::GreedilyMatchStreetsWithSuburbs(BaseContext & ctx, CentersFilter const & centers)
@@ -1256,11 +1264,7 @@ void Geocoder::GreedilyMatchStreetsWithSuburbs(BaseContext & ctx, CentersFilter 
       auto const suburbCBV = RetrieveGeometryFeatures(*m_context, rect, RectId::Suburb);
       auto const suburbStreets = ctx.m_streets.Intersect(suburbCBV);
 
-      vector<StreetsMatcher::Prediction> predictions;
-      StreetsMatcher::Go(ctx, suburbStreets, *m_filter, m_params, predictions);
-
-      for (auto const & prediction : predictions)
-        CreateStreetsLayerAndMatchLowerLayers(ctx, prediction, centers);
+      ProcessStreets(ctx, centers, suburbStreets);
 
       MatchPOIsAndBuildings(ctx, 0 /* curToken */, suburbCBV);
     });

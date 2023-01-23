@@ -3186,13 +3186,11 @@ UNIT_CLASS_TEST(ProcessorTest, ComplexPoi_Rank)
 
   SetViewport({-0.5, -0.5, 0.5, 0.5});
 
-  auto request = MakeRequest("Telekom shop");
-  auto const & results = request->Results();
-
-  TEST_EQUAL(results.size(), 2, ());
-
-  TEST(ResultsMatch({results[0]}, {ExactMatch(countryId, telekom)}), ());
-  TEST(ResultsMatch({results[1]}, {ExactMatch(countryId, poiInMall)}), ());
+  Rules const rules = {
+    ExactMatch(countryId, telekom),
+    ExactMatch(countryId, poiInMall)
+  };
+  TEST(OrderedResultsMatch(MakeRequest("Telekom shop")->Results(), rules), ());
 }
 
 UNIT_CLASS_TEST(ProcessorTest, Place_Region)
@@ -3246,6 +3244,58 @@ UNIT_CLASS_TEST(ProcessorTest, FuzzyCategories)
   {
     Rules const rules = {ExactMatch(wonderlandId, shoes)};
     TEST(ResultsMatch("ecco", rules), ());
+  }
+}
+
+UNIT_CLASS_TEST(ProcessorTest, StreetCategories)
+{
+  std::string const lang = "en";
+
+  TestStreet street({{-1, -1}, {1, 1}}, "Avenida Santa Fe", lang);
+  street.SetType({"highway", "secondary"});
+
+  TestPOI bus({0, 0}, "Avenida Santa Fe", lang);
+  bus.SetTypes({{"highway", "bus_stop"}});
+
+  TestPOI shop({-0.5, -0.5}, "Galerías Bond Street", lang);
+  shop.SetTypes({{"shop", "department_store"}});
+
+  auto wonderlandId = BuildCountry("Wonderland", [&](TestMwmBuilder & builder)
+  {
+    builder.Add(street);
+    builder.Add(bus);
+    builder.Add(shop);
+  });
+
+  SetViewport(m2::RectD(-0.5, -0.5, 0.5, 0.5));
+
+  {
+    Rules const rules = {
+      ExactMatch(wonderlandId, bus),
+      ExactMatch(wonderlandId, street)
+    };
+    TEST(OrderedResultsMatch(MakeRequest("avenida santa fe ")->Results(), rules), ());
+  }
+
+  /// @todo Should review search::FindStreets logic! Check 2 cases below:
+
+  // 1. |street| (matched by "sante fe" only) has worse rank than |shop| and even more - emitted in the second batch.
+  {
+    Rules const rules = {
+      ExactMatch(wonderlandId, bus),
+      ExactMatch(wonderlandId, shop),
+      ExactMatch(wonderlandId, street)
+    };
+    TEST(OrderedResultsMatch(MakeRequest("avenida santa fe street ")->Results(), rules), ());
+  }
+
+  // 2. Next sample matches street by "santa fe улица", thus it has low rank!
+  {
+    Rules const rules = {
+      ExactMatch(wonderlandId, bus),
+      //ExactMatch(wonderlandId, street)
+    };
+    TEST(OrderedResultsMatch(MakeRequest("avenida santa fe улица ", "ru")->Results(), rules), ());
   }
 }
 
