@@ -3,22 +3,18 @@
 #include "search/ranking_utils.hpp"
 #include "search/token_range.hpp"
 
-#include "indexer/feature_impl.hpp"
-
 #include <map>
 #include <sstream>
 
 namespace search
 {
 using namespace std;
-using namespace strings;
 
 namespace
 {
 // All synonyms should be lowercase.
 
-// @todo These should check the map language and use
-// only the corresponding translation.
+/// @todo These should check the map language and use only the corresponding translation.
 map<string, vector<string>> const kSynonyms = {
     {"n",    {"north"}},
     {"w",    {"west"}},
@@ -29,7 +25,12 @@ map<string, vector<string>> const kSynonyms = {
     {"sw",   {"southwest"}},
     {"se",   {"southeast"}},
     {"st",   {"saint", "street"}},
+
+    /// @todo Should process synonyms with errors like "blvrd" -> "blvd".
+    /// @see HouseOnStreetSynonymsWithMisprints test.
     {"blvd", {"boulevard"}},
+    {"blvrd", {"boulevard"}},
+
     {"cir",  {"circle"}},
     {"ct",   {"court"}},
     {"rt",   {"route"}},
@@ -39,11 +40,17 @@ map<string, vector<string>> const kSynonyms = {
     {"м",    {"малая", "малый"}},
     {"мал",  {"малая", "малый"}},
     {"нов",  {"новая", "новый"}},
-    {"стар", {"старая", "старый"}}};
+    {"стар", {"старая", "старый"}},
+
+    /// @todo Add all streets synonyms here.
+};
 }  // namespace
 
 // QueryParams::Token ------------------------------------------------------------------------------
-void QueryParams::Token::AddSynonym(string const & s) { AddSynonym(MakeUniString(s)); }
+void QueryParams::Token::AddSynonym(string const & s)
+{
+  AddSynonym(strings::MakeUniString(s));
+}
 
 void QueryParams::Token::AddSynonym(String const & s)
 {

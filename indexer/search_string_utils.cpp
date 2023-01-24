@@ -308,105 +308,42 @@ public:
 private:
   /// @todo Print most common street tokens for each country on generator stage
   /// (OSM ground truth) and compare with these synonyms.
+
+  // Keep only *very-common-used* synonyms here (can increase search index, otherwise).
+  // Too many synonyms increases entropy only and produces messy results ..
   StreetsSynonymsHolder()
   {
     char const * affics[] =
     {
       // Russian - Русский
-      "аллея", "бульвар", "набережная", "переулок", "площадь", "проезд", "проспект", "шоссе", "тупик", "улица", "тракт", "ал", "бул", "наб", "пер", "пл", "пр", "просп", "ш", "туп", "ул", "тр",
+      "улица", "ул",
 
       // English - English
-      "street", "st", "avenue", "av", "ave", "square", "sq", "road", "rd", "boulevard", "blvd", "drive", "dr", "highway", "hwy", "lane", "ln", "way", "circle", "place", "pl",
+      "street", "st", "avenue", "av",
 
       // Belarusian - Беларуская мова
-      "вуліца", "вул", "завулак", "набярэжная", "плошча", "пл", "праезд", "праспект", "пр", "тракт", "тр", "тупік",
-
-      // Bulgarian - Български
-      "булевард", "бул", "площад", "пл", "улица", "ул", "квартал", "кв",
-
-      /// @todo Do not use popular POI (carrefour) or Street name (rambla) tokens as generic street synonyms.
-      /// This POIs (Carrefour supermarket) and Streets (La Rambla - most popular street in Barcelona)
-      /// will be lost in search results, otherwise.
-      /// Should reconsider candidates fetching and sorting logic from scratch to make correct processing.
-
-      // Canada
-      "allee", "alley", "autoroute", "aut", "bypass", "byway", /*"carrefour", "carref",*/ "côte", "expressway", "freeway", "fwy", "pky", "pkwy",
-      /// @todo Do not use next _common search_ (e.g. 'park' is a prefix of 'parkway') tokens as generic street synonyms.
-      /// Should reconsider streets matching logic to get this synonyms back.
-      //"line", "link", "loop", "parkway", "parkvej", "path", "pathway", "route", "trail", "walk"
-
-      // Catalan language (Barcelona, Valencia, ...)
-      "avinguda", "carrer", /*"rambla", "ronda",*/ "passeig", "passatge", "travessera",
-
-      // Croatian - Hrvatski
-      "šetalište", "trg", "ulica", "ul", "poljana",
-
-      // Czech - Čeština
-      "ulice", "ul", "náměstí", "nám", "nábřeží", "nábr",
-
-      // Danish - Dansk
-      "plads", "alle", "gade", "vej",
-
-      // Dutch - Nederlands
-      "laan", "ln.", "straat", "steenweg", "stwg", "st",
-
-      // Estonian - Eesti
-      "maantee", "mnt", "puiestee", "tee", "pst",
-
-      // Finnish - Suomi
-      "kaari", "kri", "katu", "kuja", "kj", "kylä", "polku", "tie", "t", "tori", "väylä", "vlä",
+      "вуліца", "вул",
 
       // French - Français
-      "rue", "avenue", "carré", "cercle", "route", "boulevard", "drive", "autoroute", "lane", "chemin",
+      "rue",
 
       // German - Deutsch
-      "allee", "al", "brücke", "br", "chaussee", "gasse", "gr", "pfad", "straße", "str", "weg", "platz",
+      "straße", "str",
 
-      // Hungarian - Magyar
-      "utca", "út", "u.", "tér", "körút", "krt.", "rakpart", "rkp.",
-
-       // Italian - Italiano
-      "corso", "piazza", "piazzale", "strada", "via", "viale", "calle", "fondamenta",
-
-      // Latvian - Latviešu
-      "iela", "laukums",
-
-      // Lithuanian - Lietuvių
-      "gatvė", "g.", "aikštė", "a", "prospektas", "pr.", "pl", "kel",
-
-      // Nepalese - नेपाली
-      "मार्ग", "marg",
-
-      // Norwegian - Norsk
-      // Details here: https://github.com/organicmaps/organicmaps/issues/3616
-      "vei", "veien", "veg", "vegen", "vn", "gata", "gate", "gaten", "gt", "plass", "plassen", "sving", "sv", "allé",
-
-      // Polish - Polski
-      "aleja", "aleje", "aleji", "alejach", "aleją", "plac", "placu", "placem", "ulica", "ulicy",
+      // Italian - Italiano
+      "via",
 
       // Portuguese - Português
-      "rua", "r.", "travessa", "tr.", "praça", "pç.", "avenida", "quadrado", "estrada", "boulevard", "carro", "auto-estrada", "lane", "caminho",
-
-      // Romanian - Română
-      "bul", "bdul", "blv", "bulevard", "bulevardu", "calea", "cal", "piața", "pţa", "pța", "strada", "stra", "stradela", "sdla", "stradă", "unitate", "autostradă", "lane",
-
-      // Slovenian - Slovenščina
-      "cesta", "ulica", "trg", "nabrežje",
+      "rua",
 
       // Spanish - Español
-      "avenida", "avd", "avda", "bulevar", "bulev", "calle", "calleja", "cllja", "callejón", "callej", "cjon", "callejuela", "cjla", "callizo", "cllzo", "calzada", "czada", "costera", "coste", "plza", "pza", "plazoleta", "pzta", "plazuela", "plzla", "tránsito", "trans", "transversal", "trval", "trasera", "tras", "travesía", "trva", "paseo", "plaça",
-
-      // Swedish - Svenska
-      "väg", "vägen", "gata", "gatan", "gränd", "gränden", "stig", "stigen", "plats", "platsen", "allé",
+      "calle",
 
       // Turkish - Türkçe
-      "sokak", "sk.", "sok", "sokağı", "cadde", "cad", "cd", "caddesi", "bulvar", "bulvarı", "blv.",
+      "sokağı", "sk",
 
       // Ukrainian - Українська
-      "дорога", "провулок", "площа", "шосе", "вулиця", "дор", "пров", "вул",
-
-      // Vietnamese - Tiếng Việt
-      "quốc lộ", "ql", "tỉnh lộ", "tl", "Đại lộ", "Đl", "Đường", "Đ", "Đường sắt", "Đs", "Đường phố", "Đp", "vuông", "con Đường", "Đại lộ", "Đường cao tốc",
+      "вулиця", "вул",
     };
 
     for (auto const * s : affics)
@@ -487,27 +424,33 @@ bool ContainsNormalized(string const & str, string const & substr)
 // StreetTokensFilter ------------------------------------------------------------------------------
 void StreetTokensFilter::Put(strings::UniString const & token, bool isPrefix, size_t tag)
 {
-  using IsStreetChecker = std::function<bool(strings::UniString const &)>;
-
-  IsStreetChecker isStreet = m_withMisprints ? IsStreetSynonymWithMisprints : IsStreetSynonym;
-  IsStreetChecker isStreetPrefix =
-      m_withMisprints ? IsStreetSynonymPrefixWithMisprints : IsStreetSynonymPrefix;
-
-  auto const isStreetSynonym = isStreet(token);
-  if ((isPrefix && isStreetPrefix(token)) || (!isPrefix && isStreetSynonym))
+  if (isPrefix)
   {
-    ++m_numSynonyms;
-    if (m_numSynonyms == 1)
+    if (m_withMisprints)
     {
-      m_delayedToken = token;
-      m_delayedTag = tag;
-      return;
+      if (IsStreetSynonymPrefixWithMisprints(token))
+        return;
     }
-
-    // Do not emit delayed token for incomplete street synonym.
-    if ((!isPrefix || isStreetSynonym) && m_numSynonyms == 2)
-      EmitToken(m_delayedToken, m_delayedTag);
+    else
+    {
+      if (IsStreetSynonymPrefix(token))
+        return;
+    }
   }
+  else
+  {
+    if (m_withMisprints)
+    {
+      if (IsStreetSynonymWithMisprints(token))
+        return;
+    }
+    else
+    {
+      if (IsStreetSynonym(token))
+        return;
+    }
+  }
+
   EmitToken(token, tag);
 }
 }  // namespace search

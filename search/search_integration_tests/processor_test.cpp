@@ -1174,8 +1174,9 @@ UNIT_CLASS_TEST(ProcessorTest, StopWords)
 
   {
     TEST(ResultsMatch("la motviderie ", {}, "fr"), ());
+    // I don't see any reason, why token/prefix results should differ here?
     TEST(ResultsMatch("la la le la la la ", {ExactMatch(id, street)}, "fr"), ());
-    TEST(ResultsMatch("la la le la la la", {}, "fr"), ());
+    TEST(ResultsMatch("la la le la la la",  {ExactMatch(id, street)}, "fr"), ());
   }
 }
 
@@ -1749,9 +1750,14 @@ UNIT_CLASS_TEST(ProcessorTest, SquareAsStreetTest)
   });
 
   SetViewport(m2::RectD(0.0, 0.0, 1.0, 2.0));
+
   {
-    Rules rules = {ExactMatch(countryId, nonameHouse)};
-    TEST(ResultsMatch("revolution square 3", rules), ());
+    /// @todo Should skip square result?
+    Rules rules = {
+      ExactMatch(countryId, nonameHouse),
+      ExactMatch(countryId, square)
+    };
+    TEST(OrderedResultsMatch(MakeRequest("revolution square 3")->Results(), rules), ());
   }
 }
 
@@ -2110,9 +2116,6 @@ UNIT_CLASS_TEST(ProcessorTest, StreetSynonymsWithMisprints)
     Rules rules = {ExactMatch(countryId, nabrezhnaya), ExactMatch(countryId, naberezhnaya)};
     TEST(ResultsMatch("улица набрежная", rules), ());
     TEST(ResultsMatch("набрежная", rules), ());
-  }
-  {
-    Rules rules = {ExactMatch(countryId, naberezhnaya)};
     TEST(ResultsMatch("улица набережная", rules), ());
   }
 }
@@ -2196,11 +2199,6 @@ UNIT_CLASS_TEST(ProcessorTest, StreetSynonymPrefixMatch)
     TEST(ResultsMatch("Yesenina cafe ", rules), ());
     TEST(ResultsMatch("Cafe Yesenina ", rules), ());
     TEST(ResultsMatch("Cafe Yesenina", rules), ());
-  }
-  {
-    Rules rules = {ExactMatch(countryId, cafe), ExactMatch(countryId, yesenina)};
-    // Prefix match with misprints to street synonym gives street as additional result
-    // but we still can find the cafe.
     TEST(ResultsMatch("Yesenina cafe", rules), ());
   }
 }
@@ -3281,23 +3279,19 @@ UNIT_CLASS_TEST(ProcessorTest, StreetCategories)
     TEST(OrderedResultsMatch(MakeRequest("avenida santa fe ")->Results(), rules), ());
   }
 
-  /// @todo Should review search::FindStreets logic! Check 2 cases below:
-
-  // 1. |street| (matched by "sante fe" only) has worse rank than |shop| and even more - emitted in the second batch.
   {
     Rules const rules = {
+      ExactMatch(wonderlandId, street),
       ExactMatch(wonderlandId, bus),
       ExactMatch(wonderlandId, shop),
-      ExactMatch(wonderlandId, street)
     };
     TEST(OrderedResultsMatch(MakeRequest("avenida santa fe street ")->Results(), rules), ());
   }
 
-  // 2. Next sample matches street by "santa fe улица", thus it has low rank!
   {
     Rules const rules = {
+      ExactMatch(wonderlandId, street),
       ExactMatch(wonderlandId, bus),
-      //ExactMatch(wonderlandId, street)
     };
     TEST(OrderedResultsMatch(MakeRequest("avenida santa fe улица ", "ru")->Results(), rules), ());
   }
