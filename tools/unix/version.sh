@@ -18,7 +18,12 @@ COUNT=${COUNT_AND_DATE[0]}
 
 
 function ios_version {
-  echo "$DATE"
+  GIT_BRANCH=$(git branch --show-current)
+  if [ "$GIT_BRANCH" == master ]; then
+    echo "$DATE"
+  else
+    echo "$DATE-$GIT_BRANCH"
+  fi
 }
 
 function ios_build {
